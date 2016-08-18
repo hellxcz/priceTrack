@@ -1,0 +1,9 @@
+{
+  "name": "social shopper",
+  "private": "true",
+  "devDependencies": {},
+  "dependencies": {
+    "requirejs": "^2.2.0",
+    "ngCordova": "^0.1.27-alpha"
+  }
+}
