@@ -23,10 +23,15 @@ implements IPage
         (data) => {
           var some = "";
 
+            console.log("got some" );
+            console.log(data );
+
         },
         (err) => {
 
           var some = "";
+            console.log("got error:");
+            console.log(err);
 
         }
       )
