@@ -1,6 +1,6 @@
 'use strict';
 import {Injectable} from "@angular/core";
-import {WithId} from "../model/entities";
+import {WithId} from "../model/valueObjects";
 
 
 @Injectable()
@@ -75,7 +75,7 @@ export class AngularIndexedDB {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readOnly,
                     error: (e: Event) => {
                         reject(e);
@@ -103,7 +103,7 @@ export class AngularIndexedDB {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readOnly,
                     error: (e: Event) => {
                         reject(e);
@@ -133,13 +133,13 @@ export class AngularIndexedDB {
         return promise;
     }
 
-    add<T extends WithId>(storeName: string, value: T) {
+    add<T extends WithId>(storeName: string, value: T):Promise<T> {
         let self = this;
         let promise = new Promise<T>((resolve, reject) => {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readWrite,
                     error: (e: Event) => {
                         reject(e);
@@ -162,7 +162,7 @@ export class AngularIndexedDB {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readWrite,
                     error: (e: Event) => {
                         reject(e);
@@ -182,13 +182,58 @@ export class AngularIndexedDB {
         return promise;
     }
 
-    delete(storeName: string, key: any) {
+    updateInTransaction<T extends WithId>(transaction:IDBTransaction, objectStore:string, value:T):Promise{
+
+        let objectStore = transaction.objectStore(objectStore);
+
+        var dbRequest = objectStore.put(value, value.id);
+
+        var result = new Promise((resolve, reject) =>{
+
+            dbRequest.onsuccess = (e)=>{
+                resolve();
+            };
+
+            dbRequest.onerror = (e)=>{
+                reject();
+            };
+        });
+
+        return result;
+    }
+
+    executeInTransaction(storeNames:string[], callback:(IDBTransaction)=>Promise<any>):Promise<Event>{
+
+        let promise = new Promise<Event>((resolve, reject) => {
+
+            let transaction = this.dbWrapper.createTransaction({
+                storeNames: storeNames,
+                dbMode: this.utils.dbMode.readWrite,
+                error: (e: Event) => {
+                    reject(e);
+                },
+                complete: (e: Event) => {
+                    resolve(e);
+                },
+                abort: (e: Event) => {
+                    reject(e);
+                }
+            });
+
+            callback(transaction);
+
+        });
+
+        return promise;
+    }
+
+    delete(storeName: string, key: any):Promise<Event> {
         let self = this;
         let promise = new Promise<any>((resolve, reject) => {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readWrite,
                     error: (e: Event) => {
                         reject(e);
@@ -214,7 +259,7 @@ export class AngularIndexedDB {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readOnly,
                     error: (e: Event) => {
                         reject(e);
@@ -244,7 +289,7 @@ export class AngularIndexedDB {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readWrite,
                     error: (e: Event) => {
                         reject(e);
@@ -271,7 +316,7 @@ export class AngularIndexedDB {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
             let transaction = self.dbWrapper.createTransaction({
-                    storeName: storeName,
+                    storeNames: storeName,
                     dbMode: self.utils.dbMode.readOnly,
                     error: (e: Event) => {
                         reject(e);
@@ -315,7 +360,7 @@ interface DbMode {
 }
 
 interface createTransactionOptions {
-    storeName: string,
+    storeNames: any,
     dbMode: string,
     error: (e: Event) => any,
     complete: (e: Event) => any,
@@ -347,7 +392,7 @@ class DbWrapper {
     }
 
     createTransaction(options: createTransactionOptions): IDBTransaction {
-        let trans: IDBTransaction = this.db.transaction(options.storeName, options.dbMode);
+        let trans: IDBTransaction = this.db.transaction(options.storeNames, options.dbMode);
         trans.onerror = options.error;
         trans.oncomplete = options.complete;
         trans.onabort = options.abort;

@@ -16,7 +16,6 @@ class DummyItem {
     constructor(public id: string,
                 public value: string) {
     }
-
 }
 
 describe('indexedDb-playground using vanilla client', () => {
@@ -219,4 +218,92 @@ describe('indexedDb-playground using client', () => {
                     })
             });
     });
+
+    it('should be able to update item', (done) => {
+
+        var value = "value";
+        var newValue = "new value";
+
+        var failed = (e) => {
+            console.error(e);
+
+            done.fail(e);
+
+        };
+
+        client.add(itemsObjectStoreName, new DummyItem("1", value))
+            .then(() => {
+
+                client.getByKey<DummyItem>(itemsObjectStoreName, "1")
+                    .then((item) => {
+
+                        item.value = newValue;
+
+                        client.update(itemsObjectStoreName, item)
+                            .then(() => {
+
+                                client.getByKey(itemsObjectStoreName, "1")
+                                    .then(newItem => {
+
+                                        expect(newItem.value).toBe(newValue);
+
+                                        done();
+                                    })
+                            }, failed)
+                    }, failed)
+            }, failed);
+
+    });
+
+    it('should be able to update not existing item', (done) => {
+
+        var key = "1";
+
+        client.update(itemsObjectStoreName, new DummyItem(key, "value"))
+            .then(item => {
+
+                    client.getByKey<DummyItem>(itemsObjectStoreName, key)
+                        .then(item =>{
+
+                        })
+
+                    done()
+
+                },
+                (e) => {
+                    done(e)
+                });
+
+    });
+
+    // it('should be able to handle item with functions', (done)=>{
+    //
+    //     var itemId = "1";
+    //
+    //     var itemValue = "value";
+    //
+    //     client.add(itemsObjectStoreName, new DummyItem(itemId, itemValue))
+    //         .then(() => {
+    //
+    //             client.getByKey<DummyItem>(itemsObjectStoreName, itemId)
+    //                 .then((item) => {
+    //
+    //                     expect(item).toBeDefined();
+    //
+    //                     expect(item.someFunction()).toBeDefined();
+    //
+    //                     done();
+    //
+    //                 });
+    //
+    //
+    //         }, (e) => {
+    //
+    //             console.error(e);
+    //
+    //         });
+    //
+    //
+    //
+    // });
 });
