@@ -29,9 +29,9 @@ export class Item implements WithId, WithName {
     constructor(public id: string,
                 public name: string,
                 public description: string,
-                public categories: Array<ItemCategory> = [],
-                public barcodes: Array<Barcode> = [],
-                public prices: Array<Price> = []) {
+                public categories: Array<string> = [],
+                public barcodes: Array<string> = [],
+                public prices: Array<string> = []) {
     }
 }
 

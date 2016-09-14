@@ -13,8 +13,8 @@ export abstract class Dao<T extends WithId>{
         console.error(e);
     }
 
-    private ok(){
-
+    private ok(e:any){
+        return e;
     }
 
     add(item:T):Promise<T>{

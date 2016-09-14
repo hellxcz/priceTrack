@@ -114,9 +114,9 @@ describe('indexedDb-playground using vanilla client', () => {
 describe('indexedDb-playground using client', () => {
 
 
-    var client: AngularIndexedDB;
+    let client: AngularIndexedDB;
 
-    var index_valueName = "index_value";
+    let index_valueName = "index_value";
 
     beforeEach((done) => {
 
@@ -132,7 +132,12 @@ describe('indexedDb-playground using client', () => {
                         objectStore.createIndex(index_valueName, "value");
 
                     })
-                .then((e) => {
+                .then(
+                    () => {
+                        done();
+                    },
+
+                    (e) => {
 
                     console.error("got error");
                     console.error(e);
@@ -265,7 +270,7 @@ describe('indexedDb-playground using client', () => {
                     client.getByKey<DummyItem>(itemsObjectStoreName, key)
                         .then(item =>{
 
-                        })
+                        });
 
                     done()
 

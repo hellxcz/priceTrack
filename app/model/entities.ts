@@ -5,31 +5,47 @@ import {Dao} from "./dataAccess";
 
 export class ItemDao extends Dao<Item> {
     getStoreName(): string {
-        return "Item";
+        return ItemDao.getStoreName();
+    }
+
+    static getStoreName(): string {
+        return 'Item';
     }
 }
 
 export class ItemCategoryDao extends Dao<ItemCategory> {
-    protected getStoreName(): string {
-        return "ItemCategory";
+    getStoreName(): string {
+        return ItemCategoryDao.getStoreName();
+    }
+
+    static getStoreName(): string {
+        return 'ItemCategory';
     }
 }
 
 export class BarcodeDao extends Dao<Barcode> {
-    protected getStoreName(): string {
-        return "Barcode";
+    getStoreName(): string {
+        return BarcodeDao.getStoreName();
+    }
+
+    static getStoreName(): string {
+        return 'Barcode';
     }
 }
 
 export class PriceDao extends Dao<Price> {
-    protected getStoreName(): string {
-        return "Price";
+    getStoreName(): string {
+        return PriceDao.getStoreName();
+    }
+
+    static getStoreName(): string {
+        return 'Price';
     }
 }
 
 export class ItemEntityDao {
 
-    private daos: Dao[];
+    private daos: Dao[] = [];
 
     constructor(public client: AngularIndexedDB,
                 public itemDao: ItemDao,
@@ -49,62 +65,82 @@ export class ItemEntity {
 
     private item_objectStore = "item_objectStore";
 
+    private categories: Array<ItemCategory> = [];
+    private barcodes: Array<Barcode> = [];
+    private prices: Array<Price> = [];
+
     constructor(protected itemEntityDao: ItemEntityDao,
                 protected item: Item) {
 
     }
 
-    static create(itemEntityDao: ItemEntityDao, id: string, name: string, description: string = ""): ItemEntity {
+    static create(itemEntityDao: ItemEntityDao, id: string, name: string, description: string = ""): Promise<ItemEntity> {
 
-        var item = new Item(id, name, description);
+        return new Promise<ItemEntity>((resolve, reject) => {
 
-        return new ItemEntity(itemEntityDao, item);
+            itemEntityDao.itemDao.getByKey(id)
+                .then(item => {
+
+                    var dirty = false;
+
+                    if (!item) {
+                        item = new Item(id, name, description);
+                        dirty = true;
+                    }
+
+                    let itemEntity = new ItemEntity(itemEntityDao, item);
+
+                    if (dirty) {
+                        itemEntity
+                            .save()
+                            .then(() => {
+                                    resolve(itemEntity);
+                                }
+                            );
+                    } else {
+                        resolve(itemEntity);
+                    }
+
+                }, (e) => {
+                    reject(e);
+                });
+
+        });
     }
 
     public addCategory(category: ItemCategory): boolean {
 
-        var foundCategory = this.item.categories
-            .find(item => {
-                return item.id == category.id;
-            });
-
-        if (foundCategory){
+        if (this.item.categories.indexOf(category.id) > 0) {
             return false;
         }
 
-        this.item.categories.push(category);
+        this.item.categories.push(category.id);
+        this.categories.push(category);
 
         return true;
     }
 
     public addBarcode(barcode: Barcode): boolean {
 
-        var foundBarcode = this.item.barcodes
-            .find((item: Barcode) => {
-                return item.value == barcode.value
-            });
-
-        if (foundBarcode) {
+        if (this.item.barcodes.indexOf(barcode.id) > 0) {
             return false;
         }
 
-        this.item.barcodes.push(barcode);
+        this.item.barcodes.push(barcode.id);
+        this.barcodes.push(barcode);
 
         return true;
     }
 
     public addPrice(price: Price): boolean {
 
-        var found = this.item.prices
-            .find((item: Price) => {
-                return item.equals(price);
-            });
-
-        if (found) {
+        if (this.item.prices.indexOf(price.id) > 0) {
             return false;
         }
 
-        this.item.prices.push(price);
+
+        this.item.prices.push(price.id);
+        this.prices.push(price);
 
         return true;
     }
@@ -113,45 +149,38 @@ export class ItemEntity {
 
         // use transaction over multiple objectstores
 
-        this.itemEntityDao.client.executeInTransaction(
+        return this.itemEntityDao.client.executeInTransaction(
             this.itemEntityDao.getStoreNames(),
             (transaction) => {
 
-                var promises: Promise[] = [];
+                let update = (dao: Dao, item: WithId) => {
 
-                var update = (storeName: string, item: WithId): Promise => {
-
-                    var promise = this.itemEntityDao.client.updateInTransaction(
+                    this.itemEntityDao.client.updateInTransaction(
                         transaction,
-                        storeName,
+                        dao.getStoreName(),
                         item
                     );
-
-                    promises.push(promise);
-
-                    return promise;
-
                 };
 
+                let updateEach = (dao: Dao, itemList: WithId[]) => {
 
-                this.item.barcodes.forEach(
-                    (item) => update(
-                        this.itemEntityDao.barcodeDao.getStoreName(),
-                        item
-                    )
+                    itemList.forEach(item => {
+
+                        update(dao, item);
+
+                    });
+                };
+
+                updateEach(this.itemEntityDao.barcodeDao, this.barcodes);
+                updateEach(this.itemEntityDao.itemCategoryDao, this.categories);
+                updateEach(this.itemEntityDao.priceDao, this.prices);
+
+                update(
+                    this.itemEntityDao.itemDao,
+                    this.item
                 );
-
-                this.item.categories.forEach(
-                    (item) => update(
-                        this.itemEntityDao.itemCategoryDao.getStoreName(),
-                        item
-                    )
-                )
-
-
             }
         );
-
 
     }
 
