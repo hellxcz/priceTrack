@@ -2,18 +2,22 @@
 import {Injectable} from "@angular/core";
 import {WithId} from "../model/valueObjects";
 
+export abstract class IndexedDBConfiguration {
+    abstract getDbName():string;
+    abstract getDbVersion():number;
+}
 
 @Injectable()
 export class AngularIndexedDB {
     utils: Utils;
     dbWrapper: DbWrapper;
 
-    constructor(dbName, version) {
+    constructor(conf:IndexedDBConfiguration) {
         this.utils = new Utils();
-        this.dbWrapper = new DbWrapper(dbName, version);
+        this.dbWrapper = new DbWrapper(conf.getDbName(),conf.getDbVersion());
     }
 
-    createStore(version, upgradeCallback: (Event, IDBDatabase)=>void): Promise {
+    createStore(version, upgradeCallback: (Event, IDBDatabase)=>void): Promise<any> {
         let self = this,
             promise = new Promise<any>((resolve, reject) => {
                 this.dbWrapper.dbVersion = version;
@@ -182,9 +186,9 @@ export class AngularIndexedDB {
         return promise;
     }
 
-    updateInTransaction<T extends WithId>(transaction:IDBTransaction, objectStore:string, value:T):Promise{
+    updateInTransaction<T extends WithId>(transaction:IDBTransaction, objectStoreName:string, value:T):Promise<any>{
 
-        let objectStore = transaction.objectStore(objectStore);
+        let objectStore = transaction.objectStore(objectStoreName);
 
         var dbRequest = objectStore.put(value, value.id);
 
@@ -202,7 +206,7 @@ export class AngularIndexedDB {
         return result;
     }
 
-    executeInTransaction(storeNames:string[], callback:(IDBTransaction)=>Promise<any>):Promise<Event>{
+    executeInTransaction(storeNames:string[], callback:(IDBTransaction)=>void):Promise<Event>{
 
         let promise = new Promise<Event>((resolve, reject) => {
 

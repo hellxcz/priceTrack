@@ -1,5 +1,3 @@
-import {Item} from "ionic-angular";
-import {AngularIndexedDB} from "../common/angular2-indexeddb";
 export interface WithId {
     id: string;
 }

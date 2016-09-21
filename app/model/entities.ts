@@ -1,8 +1,10 @@
 import {AngularIndexedDB} from "../common/angular2-indexeddb";
 import {Item, ItemCategory, Barcode, Price, WithId} from "./valueObjects";
+import {Injectable, Component} from "@angular/core";
 import {Dao} from "./dataAccess";
 
 
+@Injectable()
 export class ItemDao extends Dao<Item> {
     getStoreName(): string {
         return ItemDao.getStoreName();
@@ -13,6 +15,7 @@ export class ItemDao extends Dao<Item> {
     }
 }
 
+@Injectable()
 export class ItemCategoryDao extends Dao<ItemCategory> {
     getStoreName(): string {
         return ItemCategoryDao.getStoreName();
@@ -23,6 +26,7 @@ export class ItemCategoryDao extends Dao<ItemCategory> {
     }
 }
 
+@Injectable()
 export class BarcodeDao extends Dao<Barcode> {
     getStoreName(): string {
         return BarcodeDao.getStoreName();
@@ -33,6 +37,7 @@ export class BarcodeDao extends Dao<Barcode> {
     }
 }
 
+@Injectable()
 export class PriceDao extends Dao<Price> {
     getStoreName(): string {
         return PriceDao.getStoreName();
@@ -43,9 +48,10 @@ export class PriceDao extends Dao<Price> {
     }
 }
 
+@Injectable()
 export class ItemEntityDao {
 
-    private daos: Dao[] = [];
+    private daos: Dao<any>[] = [];
 
     constructor(public client: AngularIndexedDB,
                 public itemDao: ItemDao,
@@ -61,34 +67,26 @@ export class ItemEntityDao {
 
 }
 
-export class ItemEntity {
+@Injectable()
+export class ItemEntityBuilder{
 
-    private item_objectStore = "item_objectStore";
+    constructor(protected itemEntityDao: ItemEntityDao){}
 
-    private categories: Array<ItemCategory> = [];
-    private barcodes: Array<Barcode> = [];
-    private prices: Array<Price> = [];
-
-    constructor(protected itemEntityDao: ItemEntityDao,
-                protected item: Item) {
-
-    }
-
-    static create(itemEntityDao: ItemEntityDao, id: string, name: string, description: string = ""): Promise<ItemEntity> {
+    create(id: string, name: string, description: string = ""): Promise<ItemEntity> {
 
         return new Promise<ItemEntity>((resolve, reject) => {
 
-            itemEntityDao.itemDao.getByKey(id)
+            this.itemEntityDao.itemDao.getByKey(id)
                 .then(item => {
 
-                    var dirty = false;
+                    let dirty = false;
 
                     if (!item) {
                         item = new Item(id, name, description);
                         dirty = true;
                     }
 
-                    let itemEntity = new ItemEntity(itemEntityDao, item);
+                    let itemEntity = new ItemEntity(this.itemEntityDao, item);
 
                     if (dirty) {
                         itemEntity
@@ -106,6 +104,22 @@ export class ItemEntity {
                 });
 
         });
+    }
+
+
+}
+
+export class ItemEntity {
+
+    private item_objectStore = "item_objectStore";
+
+    private categories: Array<ItemCategory> = [];
+    private barcodes: Array<Barcode> = [];
+    private prices: Array<Price> = [];
+
+    constructor(protected itemEntityDao: ItemEntityDao,
+                protected item: Item) {
+
     }
 
     public addCategory(category: ItemCategory): boolean {
@@ -153,7 +167,7 @@ export class ItemEntity {
             this.itemEntityDao.getStoreNames(),
             (transaction) => {
 
-                let update = (dao: Dao, item: WithId) => {
+                let update = (dao: Dao<any>, item: WithId) => {
 
                     this.itemEntityDao.client.updateInTransaction(
                         transaction,
@@ -162,7 +176,7 @@ export class ItemEntity {
                     );
                 };
 
-                let updateEach = (dao: Dao, itemList: WithId[]) => {
+                let updateEach = (dao: Dao<any>, itemList: WithId[]) => {
 
                     itemList.forEach(item => {
 
@@ -183,5 +197,15 @@ export class ItemEntity {
         );
 
     }
+
+}
+
+
+@Component({
+    providers : [
+        ItemEntityBuilder, ItemEntityDao, PriceDao, BarcodeDao, ItemCategoryDao, ItemDao
+    ]
+})
+export class EntitiesComponent{
 
 }

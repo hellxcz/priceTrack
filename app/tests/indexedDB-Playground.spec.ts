@@ -121,7 +121,14 @@ describe('indexedDb-playground using client', () => {
     beforeEach((done) => {
 
 
-        client = new AngularIndexedDB(dbName, 1);
+        client = new AngularIndexedDB( {
+            getDbName(){
+                return dbName;
+            },
+            getDbVersion()  {
+                return 1;
+            }
+        });
 
         var callback = () => {
             client

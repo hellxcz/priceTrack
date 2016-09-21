@@ -1,4 +1,12 @@
-import {ItemEntity, ItemEntityDao, ItemDao, ItemCategoryDao, BarcodeDao, PriceDao} from "../model/entities";
+import {
+    ItemEntity,
+    ItemEntityDao,
+    ItemDao,
+    ItemCategoryDao,
+    BarcodeDao,
+    PriceDao,
+    ItemEntityBuilder
+} from "../model/entities";
 import {AngularIndexedDB} from "../common/angular2-indexeddb";
 import {Price} from "../model/valueObjects";
 describe('item entity', () => {
@@ -12,9 +20,17 @@ describe('item entity', () => {
 
     beforeEach(done => {
 
-        client = new AngularIndexedDB(dbName, 1);
+        client = new AngularIndexedDB(
+            {
+                getDbName(){
+                    return dbName;
+                },
+                getDbVersion()  {
+                    return 1;
+                }
+            });
 
-        var callback = () => {
+        let callback = () => {
             client
                 .createStore(1,
                     (e: Event, db: IDBDatabase) => {
@@ -70,7 +86,9 @@ describe('item entity', () => {
 
         let itemEntityDao = new ItemEntityDao(client, itemDao, itemCategoryDao, barcodeDao, priceDao);
 
-        return ItemEntity.create(itemEntityDao, itemId, "name");
+        let itemEntityFactory = new ItemEntityBuilder(itemEntityDao);
+
+        return itemEntityFactory.create(itemId, "name");
 
     };
 
@@ -92,27 +110,24 @@ describe('item entity', () => {
                 item.save()
                     .then(() => {
                         done();
-
                     });
 
             }, e => {
-
                 done(false);
 
             });
     });
 
-    it('should be able to save after create', done =>{
+    it('should be able to save after create', done => {
 
         create()
-            .then(item =>{
+            .then(item => {
 
 
                 let itemDao = new ItemDao(client);
 
                 itemDao.getByKey(itemId)
                     .then(
-
                         itemByKey => {
 
                             expect(itemByKey).toBeDefined();
@@ -121,7 +136,6 @@ describe('item entity', () => {
                             done();
 
                         }
-
                     )
 
             })
@@ -154,7 +168,6 @@ describe('item entity', () => {
                             });
                     });
             });
-
     })
 
 });

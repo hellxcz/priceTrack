@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {NavController} from 'ionic-angular';
 import {IPage} from "../../common/pages";
 import { BarcodeScanner } from 'ionic-native';
+import {ItemEntityBuilder} from "../../model/entities";
 
 @Component({
   templateUrl: 'build/pages/home/home.html'
@@ -9,11 +10,16 @@ import { BarcodeScanner } from 'ionic-native';
 export class HomePage
 implements IPage
 {
+
+  userName:string;
+
   getName(): string {
     return "Home";
   }
   constructor(
-    private navCtrl: NavController
+    private navCtrl: NavController,
+    private itemEntityFactory : ItemEntityBuilder
+
 
   ) {
 
@@ -35,6 +41,11 @@ implements IPage
 
         }
       )
+
+  }
+
+
+  clicked(e){
 
   }
 }

@@ -1,5 +1,6 @@
 import {WithId} from "./valueObjects";
 import {AngularIndexedDB} from "../common/angular2-indexeddb";
+import {Injectable} from "@angular/core";
 
 export abstract class Dao<T extends WithId>{
 
@@ -42,5 +43,4 @@ export abstract class Dao<T extends WithId>{
         return this.client.getByIndex(this.getStoreName(), indexName, key)
             .then(this.ok, this.error);
     }
-
 }
