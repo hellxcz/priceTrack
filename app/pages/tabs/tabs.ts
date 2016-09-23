@@ -3,6 +3,7 @@ import {HomePage} from '../home/home';
 import {AboutPage} from '../about/about';
 import {ContactPage} from '../contact/contact';
 import {IPage} from "../../common/pages";
+import {ScanNewPage} from "../scanNew/scanNew";
 
 @Component({
   templateUrl: 'build/pages/tabs/tabs.html'
@@ -18,7 +19,7 @@ export class TabsPage {
     // should be each tab's root Page
 
     this.tab1Root = HomePage;
-    this.tab2Root = AboutPage;
+    this.tab2Root = ScanNewPage;
     this.tab3Root = ContactPage;
   }
 }

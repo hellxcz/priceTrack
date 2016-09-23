@@ -1,6 +1,9 @@
 import {AngularIndexedDB} from "../common/angular2-indexeddb";
 import {Item, ItemCategory, Barcode, Price, WithId} from "./valueObjects";
-import {Injectable, Component} from "@angular/core";
+import {Injectable,
+    Component,
+    // NgModule
+} from "@angular/core";
 import {Dao} from "./dataAccess";
 
 
@@ -200,12 +203,11 @@ export class ItemEntity {
 
 }
 
-
-@Component({
-    providers : [
-        ItemEntityBuilder, ItemEntityDao, PriceDao, BarcodeDao, ItemCategoryDao, ItemDao
-    ]
-})
-export class EntitiesComponent{
-
-}
+//
+// @NgModule({
+//     providers : [
+//         ItemEntityBuilder, ItemEntityDao, PriceDao, BarcodeDao, ItemCategoryDao, ItemDao
+//
+//     ]
+// })
+// export class EntitiesModule{}

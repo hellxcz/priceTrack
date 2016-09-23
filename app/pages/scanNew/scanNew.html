@@ -1,0 +1,32 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Scan new code</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding class="scanNew">
+    <ion-list>
+
+        <ion-item>
+            <ion-label>Code</ion-label>
+            <ion-input type="text"  [(ngModel)]="model.code"></ion-input>
+        </ion-item>
+
+        <ion-item>
+            <ion-label>Price</ion-label>
+            <ion-input type="number"  [(ngModel)]="model.price"></ion-input>
+        </ion-item>
+
+        <ion-item>
+            <ion-label>Description</ion-label>
+            <ion-input type="text"  [(ngModel)]="model.description" ></ion-input>
+        </ion-item>
+
+    </ion-list>
+
+    <div padding>
+        <button block padding (click)="scanClicked($event)">Scan</button>
+        <button block padding (click)="ocrClicked($event)">OCR</button>
+        <button block padding (click)="saveClicked($event)">Save</button>
+    </div>
+</ion-content>
