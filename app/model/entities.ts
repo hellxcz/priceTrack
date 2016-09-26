@@ -1,7 +1,7 @@
 import {AngularIndexedDB} from "../common/angular2-indexeddb";
 import {Item, ItemCategory, Barcode, Price, WithId} from "./valueObjects";
 import {Injectable,
-    Component,
+    // Component,
     // NgModule
 } from "@angular/core";
 import {Dao} from "./dataAccess";
@@ -9,6 +9,10 @@ import {Dao} from "./dataAccess";
 
 @Injectable()
 export class ItemDao extends Dao<Item> {
+    constructor(protected client:AngularIndexedDB){
+        super(client);
+    }
+
     getStoreName(): string {
         return ItemDao.getStoreName();
     }
@@ -20,6 +24,10 @@ export class ItemDao extends Dao<Item> {
 
 @Injectable()
 export class ItemCategoryDao extends Dao<ItemCategory> {
+    constructor(protected client:AngularIndexedDB){
+        super(client);
+    }
+
     getStoreName(): string {
         return ItemCategoryDao.getStoreName();
     }
@@ -31,6 +39,10 @@ export class ItemCategoryDao extends Dao<ItemCategory> {
 
 @Injectable()
 export class BarcodeDao extends Dao<Barcode> {
+    constructor(protected client:AngularIndexedDB){
+        super(client);
+    }
+
     getStoreName(): string {
         return BarcodeDao.getStoreName();
     }
@@ -42,6 +54,10 @@ export class BarcodeDao extends Dao<Barcode> {
 
 @Injectable()
 export class PriceDao extends Dao<Price> {
+    constructor(protected client:AngularIndexedDB){
+        super(client);
+    }
+
     getStoreName(): string {
         return PriceDao.getStoreName();
     }
@@ -189,7 +205,7 @@ export class ItemEntity {
                 };
 
                 updateEach(this.itemEntityDao.barcodeDao, this.barcodes);
-                updateEach(this.itemEntityDao.itemCategoryDao, this.categories);
+                // updateEach(this.itemEntityDao.itemCategoryDao, this.categories);
                 updateEach(this.itemEntityDao.priceDao, this.prices);
 
                 update(

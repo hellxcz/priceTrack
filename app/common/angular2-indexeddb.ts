@@ -17,13 +17,13 @@ export class AngularIndexedDB {
         this.dbWrapper = new DbWrapper(conf.getDbName(),conf.getDbVersion());
     }
 
-    createStore(version, upgradeCallback: (Event, IDBDatabase)=>void): Promise<any> {
+    createStore(version, upgradeCallback: (e:Event, db:IDBDatabase)=>void): Promise<any> {
         let self = this,
             promise = new Promise<any>((resolve, reject) => {
                 this.dbWrapper.dbVersion = version;
                 let request = this.utils.indexedDB.open(this.dbWrapper.dbName, version);
                 request.onsuccess = (e) => {
-                    self.dbWrapper.db = request.result;
+                    this.dbWrapper.db = request.result;
                     resolve();
                 };
 
@@ -50,9 +50,9 @@ export class AngularIndexedDB {
     deleteDatabase(): Promise<any> {
 
 
-        var promise = new Promise<any>((resolve, reject) => {
+        let promise = new Promise<any>((resolve, reject) => {
 
-            var request = this.utils.indexedDB.deleteDatabase(this.dbWrapper.dbName);
+            let request = this.utils.indexedDB.deleteDatabase(this.dbWrapper.dbName);
 
             request.onsuccess = function (e) {
                 resolve();
@@ -74,7 +74,7 @@ export class AngularIndexedDB {
 
     getByKey<T>(storeName: string, key: any): Promise<T> {
         let self = this;
-        var result: T;
+        let result: T;
         let promise = new Promise<T>((resolve, reject) => {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 

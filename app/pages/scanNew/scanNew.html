@@ -14,12 +14,32 @@
 
         <ion-item>
             <ion-label>Price</ion-label>
-            <ion-input type="number"  [(ngModel)]="model.price"></ion-input>
+
+            <ion-input type="number"
+                       min="0" step="0.5"
+                       [(ngModel)]="model.price"></ion-input>
         </ion-item>
+
+        <ion-item>
+            <ion-label>Name</ion-label>
+            <ion-input type="text"  [(ngModel)]="model.name" ></ion-input>
+        </ion-item>
+
 
         <ion-item>
             <ion-label>Description</ion-label>
             <ion-input type="text"  [(ngModel)]="model.description" ></ion-input>
+        </ion-item>
+
+
+
+        <ion-item>
+            <ion-label>Category</ion-label>
+            <ion-select [(ngModel)]="model.category" >
+                <ion-option
+                        *ngFor="let category of categories"
+                        value="{{category.id}}">{{category.name}}</ion-option>
+            </ion-select>
         </ion-item>
 
     </ion-list>
@@ -29,4 +49,8 @@
         <button block padding (click)="ocrClicked($event)">OCR</button>
         <button block padding (click)="saveClicked($event)">Save</button>
     </div>
+
+    <button fab fab-right fab-bottom>
+        <ion-icon name="barcode"></ion-icon>
+    </button>
 </ion-content>
