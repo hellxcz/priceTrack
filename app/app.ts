@@ -5,6 +5,7 @@ import {TabsPage} from "./pages/tabs/tabs";
 import {ItemDao, ItemCategoryDao, BarcodeDao, PriceDao, ItemEntityDao, ItemEntityBuilder} from "./model/entities";
 import {IndexedDBConfiguration, AngularIndexedDB} from "./common/angular2-indexeddb";
 import {ItemCategory} from "./model/valueObjects";
+import {HomePage} from "./pages/home/home";
 
 @Injectable()
 export class IndexedDBConfigurationImpl extends IndexedDBConfiguration {
@@ -19,7 +20,9 @@ export class IndexedDBConfigurationImpl extends IndexedDBConfiguration {
 
 
 @Component({
-    template: '<ion-nav [root]="rootPage"></ion-nav>',
+    // template: '<ion-nav [root]="rootPage"></ion-nav>',
+    templateUrl: 'build/app.html',
+
     providers: [
         ItemEntityBuilder, ItemEntityDao, PriceDao, BarcodeDao, ItemCategoryDao, ItemDao,
         {
@@ -36,7 +39,7 @@ export class MyApp {
                 private angularIndexedDb: AngularIndexedDB,
                 private itemCategoryDao:ItemCategoryDao
     ) {
-        this.rootPage = TabsPage;
+        this.rootPage = HomePage;
 
         platform.ready().then(() => {
             // Okay, so the platform is ready and our plugins are available.

@@ -20,6 +20,37 @@ export class ItemDao extends Dao<Item> {
     static getStoreName(): string {
         return 'Item';
     }
+
+    static getByLastChangedIndexName(): string{
+        return 'byLastChangedIndex';
+    }
+
+    public getByLastChanged():Promise<Item[]>{
+
+        let result = [];
+
+        let promise = new Promise<Item[]>((resolve, reject) => {
+
+
+            this.getIndexCursor(
+                item => {
+
+                    if (item) {
+                        result.push(item)
+                    } else {
+                        resolve(result);
+
+                    }
+
+                },
+                e => reject(e),
+                ItemDao.getByLastChangedIndexName()
+            )
+        });
+
+        return promise;
+
+    }
 }
 
 @Injectable()
@@ -141,11 +172,19 @@ export class ItemEntity {
 
     }
 
+    private onChanged(){
+
+        this.item.lastChanged = new Date();
+
+    }
+
     public addCategory(category: ItemCategory): boolean {
 
         if (this.item.categories.indexOf(category.id) > 0) {
             return false;
         }
+
+        this.onChanged();
 
         this.item.categories.push(category.id);
         this.categories.push(category);
@@ -159,6 +198,8 @@ export class ItemEntity {
             return false;
         }
 
+        this.onChanged();
+
         this.item.barcodes.push(barcode.id);
         this.barcodes.push(barcode);
 
@@ -171,6 +212,7 @@ export class ItemEntity {
             return false;
         }
 
+        this.onChanged();
 
         this.item.prices.push(price.id);
         this.prices.push(price);

@@ -1,8 +1,13 @@
+
 <ion-header>
   <ion-navbar>
-    <ion-title>Items</ion-title>
+    <button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Home</ion-title>
   </ion-navbar>
 </ion-header>
+
 
 <ion-content padding class="home">
   <ion-list>
@@ -22,4 +27,9 @@
   <div padding>
     <button block (click)="clicked($event)">Sign In</button>
   </div>
+
+  <button fab fab-right fab-bottom>
+    <ion-icon name="barcode" (click)="barcodeCliecked($event)"></ion-icon>
+  </button>
+
 </ion-content>

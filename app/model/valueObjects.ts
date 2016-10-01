@@ -24,6 +24,8 @@ export class ItemCategory implements WithId, WithName {
 
 export class Item implements WithId, WithName {
 
+    public lastChanged:Date = new Date();
+
     constructor(public id: string,
                 public name: string,
                 public description: string,

@@ -2,7 +2,8 @@ import {
     addProviders,
     inject
 } from '@angular/core/testing';
-import {AngularIndexedDB} from "../common/angular2-indexeddb";
+import {AngularIndexedDB, IndexDirection} from "../common/angular2-indexeddb";
+import {stringify} from "@angular/forms/src/facade/lang";
 
 // Load the implementations that should be tested
 // import { App } from './app.component';
@@ -121,7 +122,7 @@ describe('indexedDb-playground using client', () => {
     beforeEach((done) => {
 
 
-        client = new AngularIndexedDB( {
+        client = new AngularIndexedDB({
             getDbName(){
                 return dbName;
             },
@@ -146,12 +147,12 @@ describe('indexedDb-playground using client', () => {
 
                     (e) => {
 
-                    console.error("got error");
-                    console.error(e);
+                        console.error("got error");
+                        console.error(e);
 
-                    done();
+                        done();
 
-                });
+                    });
         };
 
         client.deleteDatabase().then(
@@ -178,7 +179,7 @@ describe('indexedDb-playground using client', () => {
     });
 
 
-    it('should be able to use AngularIndexedDB for reads and writes', (done) => {
+    it('should be able to use AngularIndexedDB for reads and writes', done => {
 
         var itemId = "1";
 
@@ -210,16 +211,16 @@ describe('indexedDb-playground using client', () => {
 
     });
 
-    it('should be able to create index and get data by index', (done) => {
+    it('should be able to create index and get data by index', done => {
 
         // index must be created in upgradeCallback callback
 
-        var value = "value";
+        let value = "value";
 
         client.add(itemsObjectStoreName, new DummyItem("1", value))
             .then(() => {
 
-                client.getByIndex(itemsObjectStoreName, index_valueName, value)
+                client.getByIndex<DummyItem>(itemsObjectStoreName, index_valueName, value)
                     .then((item) => {
 
                         expect(item).toBeDefined();
@@ -231,7 +232,68 @@ describe('indexedDb-playground using client', () => {
             });
     });
 
-    it('should be able to update item', (done) => {
+    it('should be able to sort data by index', done => {
+
+        client.executeInTransaction(
+            [itemsObjectStoreName],
+            (transaction) => {
+
+
+                let items = [];
+
+                for (let i = 0; i < 100; i++) {
+
+                    let iString = i.toString();
+
+                    items.push(new DummyItem(iString, iString));
+                }
+
+                let update = (item: DummyItem) => {
+
+                    client.updateInTransaction(
+                        transaction,
+                        itemsObjectStoreName,
+                        item
+                    );
+                };
+
+                items.forEach(item => {
+
+                    update(item);
+
+                });
+
+            }
+        ).then(() => {
+
+            client.getIndexCursor<DummyItem>(
+
+                value => {
+
+                    if (value) {
+
+                        console.log(JSON.stringify(value));
+
+                        //console.log(value);
+
+                        //value.continue();
+                    }
+                    else {
+                        done();
+                    }
+                },
+
+                e => {},
+
+                itemsObjectStoreName,
+                index_valueName,
+                IndexDirection.ASC
+            );
+
+        });
+    }, 10000);
+
+    it('should be able to update item', done => {
 
         var value = "value";
         var newValue = "new value";
@@ -254,7 +316,7 @@ describe('indexedDb-playground using client', () => {
                         client.update(itemsObjectStoreName, item)
                             .then(() => {
 
-                                client.getByKey(itemsObjectStoreName, "1")
+                                client.getByKey<DummyItem>(itemsObjectStoreName, "1")
                                     .then(newItem => {
 
                                         expect(newItem.value).toBe(newValue);
@@ -267,7 +329,7 @@ describe('indexedDb-playground using client', () => {
 
     });
 
-    it('should be able to update not existing item', (done) => {
+    it('should be able to update not existing item', done => {
 
         var key = "1";
 
@@ -275,7 +337,7 @@ describe('indexedDb-playground using client', () => {
             .then(item => {
 
                     client.getByKey<DummyItem>(itemsObjectStoreName, key)
-                        .then(item =>{
+                        .then(item => {
 
                         });
 

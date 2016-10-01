@@ -190,9 +190,9 @@ export class AngularIndexedDB {
 
         let objectStore = transaction.objectStore(objectStoreName);
 
-        var dbRequest = objectStore.put(value, value.id);
+        let dbRequest = objectStore.put(value, value.id);
 
-        var result = new Promise((resolve, reject) =>{
+        let result = new Promise((resolve, reject) =>{
 
             dbRequest.onsuccess = (e)=>{
                 resolve();
@@ -315,7 +315,7 @@ export class AngularIndexedDB {
 
     getByIndex<T>(storeName: string, indexName: string, key: any): Promise<T> {
         let self = this;
-        var result: T;
+        let result: T;
         let promise = new Promise<T>((resolve, reject) => {
             self.dbWrapper.validateBeforeTransaction(storeName, reject);
 
@@ -343,6 +343,72 @@ export class AngularIndexedDB {
 
         return promise;
     }
+
+    getIndex(storeName: string, indexName:string): Promise<IDBIndex>{
+
+        let self = this;
+        let promise = new Promise<IDBIndex>((resolve, reject) => {
+            self.dbWrapper.validateBeforeTransaction(storeName, reject);
+
+            let transaction = self.dbWrapper.createTransaction({
+                    storeNames: storeName,
+                    dbMode: self.utils.dbMode.readOnly,
+                    error: (e: Event) => {
+                        reject(e);
+                    },
+                    complete: (e: Event) => {
+                        //resolve(result);
+                    },
+                    abort: (e: Event) => {
+                        reject(e);
+                    }
+                }),
+                objectStore = transaction.objectStore(storeName),
+                index = objectStore.index(indexName);
+                resolve(index);
+
+        });
+
+        return promise;
+    }
+
+    getIndexCursor<T>(callback: (value:T) => void, errorCallback: (e:Event) => void, storeName : string, indexName : string, indexDirection: IndexDirection = IndexDirection.ASC){
+
+            this.getIndex(storeName, indexName)
+                .then(index => {
+
+                    let order = indexDirection == IndexDirection.ASC ? "next" : "prev";
+
+                    let openCursorRequest = index.openCursor(null, order);
+
+                    openCursorRequest.onsuccess = (e: any) => {
+
+                        let cursor = <IDBCursorWithValue>e.target.result;
+
+                        callback(cursor.value);
+
+                        cursor.continue();
+
+                    };
+
+                    openCursorRequest.onerror = (e: Event) => {
+
+
+
+                    };
+
+
+                }, e => errorCallback(e));
+
+    }
+
+}
+
+export enum IndexDirection{
+
+    ASC,
+    DESC
+
 }
 
 class Utils {
