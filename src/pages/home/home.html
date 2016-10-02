@@ -1,0 +1,30 @@
+<ion-header>
+    <ion-navbar>
+        <button menuToggle ion-button>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>Home</ion-title>
+    </ion-navbar>
+</ion-header>
+
+
+<ion-content padding class="home">
+    <ion-list>
+
+        <ion-item *ngFor="let item of items">
+            {{item.name}}
+
+            {{item.description}}
+        </ion-item>
+
+
+    </ion-list>
+
+    <ion-fab right bottom>
+        <button ion-fab (click)="barcodeClicked($event)">
+            <ion-icon name="barcode"></ion-icon>
+        </button>
+
+    </ion-fab>
+
+</ion-content>

@@ -1,0 +1,103 @@
+<ion-header>
+    <ion-navbar>
+        <button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>Scan Code</ion-title>
+    </ion-navbar>
+</ion-header>
+<ion-content padding class="scanNew">
+
+    <ion-list>
+
+        <form #form="ngForm" (ngSubmit)="onSubmit(form.value)">
+
+            <ion-item>
+                <ion-label stacked>Code</ion-label>
+                <ion-input
+                        type="text"
+                        required
+                        name="code"
+                        [(ngModel)]="model.code"
+                        ngControl="code"
+                ></ion-input>
+            </ion-item>
+            <!--<div *ngIf="username.hasError('required') && username.touched"-->
+            <!--class="error-box">* Username is required!</div>-->
+
+            <ion-item>
+                <ion-label stacked>Price</ion-label>
+
+                <ion-input
+                        name="price"
+                        ngControl="price"
+                        required
+                        type="number"
+                        min="0" step="0.5"
+                        [(ngModel)]="model.price"></ion-input>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label stacked>Name</ion-label>
+                <ion-input
+                        name="name"
+                        ngControl="name"
+                        required
+                        type="text"
+                        [(ngModel)]="model.name"></ion-input>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label stacked>Description</ion-label>
+                <ion-textarea
+                        name="description"
+                        ngControl="description"
+                        rows="6"
+                        [(ngModel)]="model.description"></ion-textarea>
+            </ion-item>
+
+
+            <ion-item>
+                <ion-label stacked>Category</ion-label>
+                <ion-select
+                        name="categoryId"
+                        ngControl="categoryId"
+                        required
+                        [(ngModel)]="model.categoryId"
+                        >
+                    <ion-option
+                            *ngFor="let category of categories"
+                            value="{{category.id}}">
+                        {{category.name}}
+                    </ion-option>
+                </ion-select>
+            </ion-item>
+
+            <button ion-button type="submit" class="custom-button" [disabled]="!form.valid" block>Submit</button>
+        </form>
+
+    </ion-list>
+
+    <ion-grid>
+        <ion-row>
+            <ion-col>
+                <button block padding ion-button (click)="barcodeClicked($event)">Scan</button>
+            </ion-col>
+            <ion-col>
+                <button block padding ion-button (click)="ocrClicked($event)">OCR</button>
+            </ion-col>
+            <ion-col>
+                <button block padding ion-button (click)="saveClicked($event)">Save</button>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <ion-fab right bottom>
+        <button ion-fab (click)="barcodeClicked($event)">
+            <ion-icon name="barcode"></ion-icon>
+        </button>
+
+    </ion-fab>
+</ion-content>
